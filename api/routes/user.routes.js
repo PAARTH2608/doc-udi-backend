@@ -8,7 +8,6 @@ const {
 } = require("../middlewares/validation/user");
 
 router.post("/create-user", (req, res) => {
-  console.log("yo");
   userController.createUser(req, res);
 });
 router.post("/sign-in", validateUserSignIn, userValidation, (req, res) => {

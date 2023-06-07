@@ -85,7 +85,6 @@ DocSchema.methods.comparePassword = async function (password) {
     const result = await bcrypt.compare(password, this.password);
     return result;
   } catch (error) {
-    console.log("Error while comparing password!", error.message);
   }
 };
 
@@ -97,7 +96,6 @@ DocSchema.statics.isThisEmailInUse = async function (email) {
 
     return true;
   } catch (error) {
-    console.log("error inside isThisEmailInUse method", error.message);
     return false;
   }
 };

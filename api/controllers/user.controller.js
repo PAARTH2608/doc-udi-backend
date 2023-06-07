@@ -7,7 +7,6 @@ require("dotenv").config();
 
 // creating new user
 const createUser = async (req, res) => {
-  console.log("in createUser");
   const medicalHistory = "";
   const { name, email, password, pfp } = req.body;
   const isNewUser = await User.isThisEmailInUse(email);
@@ -122,11 +121,9 @@ const previousAppointments = async (req, res) => {
   const id = req.body.patientID;
   User.findById(id, (err, prevAppointments) => {
     if(!prevAppointments || err){
-      console.log(err);
       res.json({ success: false, message: "error in finding prev appointments" });
     }
     else{
-      console.log("prev appointments of patient given");
       var bytes  = CryptoJS.AES.decrypt(prevAppointments.medicalHistory, 'secret key 123');
       var originalText = bytes.toString(CryptoJS.enc.Utf8);
       
@@ -146,11 +143,9 @@ const upcomingAppointments = async (req, res) => {
   const pid = req.body.id;
   await Appointment.find({ patientID: pid }, (err, upAppointments) => {
     if(upAppointments.length === 0 || err){
-      console.log(err);
       res.json({ success: false, message: "error in finding upcoming appointments" });
     }
     else{
-      console.log("upcoming appointments of patient given");
       res.json({ success: true, upAppointments });
     }
   })
@@ -163,14 +158,11 @@ const startAppointment = async (req, res) => {
 
   await Doc.findById(docID, (err, docData) => {
     if(!docData || err){
-      console.log(err);
       res.json({ success: false, message: "error while finding doctor" });
       return;
     }
     else{
-      console.log("doctor found");
       currentAppointment = docData.currentAppointment;
-      console.log(currentAppointment);
     }
   });
 
@@ -187,11 +179,7 @@ const startAppointment = async (req, res) => {
 
   await Doc.updateOne({ _id: docID }, { currentAppointment }, (err, upDoc) => {
     if(!upDoc || err){
-      console.log(err);
       res.json({ success: false, message: "error while updating doctor's currentAppointment array" });
-    }
-    else{
-      console.log(upDoc);
     }
   });
   
@@ -204,11 +192,9 @@ const getDoctorBySpecialization = async (req, res) => {
   const specialization = req.body.specialization;
   await Doc.find({ specialization }, (err, docs) => {
     if(err){
-      console.log(err);
       res.json({ success: false, message: "error in finding doctors" });
     }
     else{
-      console.log("docs given according to specialization")
       res.json({ success: true, docs });
     }
   });
@@ -220,11 +206,9 @@ const getDoctorBySpecialization = async (req, res) => {
 const getAllDoctors = async (req, res) => {
   await Doc.find((err,docs)=>{
     if(err){
-        console.log(err);
         res.json({ success: false, message: "error in finding doctors" });
     }
     else{
-      console.log("all docs given")
       res.json({ success: true, docs });
     }
   }); 
@@ -235,9 +219,7 @@ const getAllDoctors = async (req, res) => {
 const endAppointment = async (req, res) => {
   const { patientID, date, time_slot } = req.body;
   await Appointment.findOne({ patientID, date, time_slot },(err, appointment) =>{
-    console.log(appointment);
     if(err){
-      console.log(err);
       res.json({ success: false, message: "error in getting appointment" });
     }
     else if(!appointment){
@@ -254,18 +236,15 @@ const updatePfp = async (req, res) => {
   const { id, pfp } = req.body;
   await User.findById(id, (err, user) => {
     if(!user || err){
-      console.log(err);
       res.json({ success: false, messsage: "error in finding user" });
     }
   });
 
   await User.findByIdAndUpdate(id, { pfp }, (err, user) =>{
     if(err){
-      console.log(err);
       res.json({ success: false, message: "error in updating user" });
     }
     else{
-      console.log("user pfp updated");
       res.json({ success: true, message: "pfp updated successfully", user });
     }
   })

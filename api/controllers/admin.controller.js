@@ -5,7 +5,6 @@ var CryptoJS = require("crypto-js");
 
 // creating new admin
 const createDoc = async (req, res) => {
-  console.log("in createDoc");
   const currentAppointment = [];
   const { pfp, name, email, password, clinic_address, specialization, city, time_slots, consultation_fee, working_days } = req.body;
   const isNewUser = await Doc.isThisEmailInUse(email);
@@ -99,7 +98,6 @@ const uploadPrescription = async (req, res) => {
 
   await User.findById(patientID, (err, userData) => {
     if(!userData || err){
-      console.log(err);
       res.json({ success: false, message: "error while finding user" });
       return;
     }
@@ -108,7 +106,6 @@ const uploadPrescription = async (req, res) => {
         var bytes  = CryptoJS.AES.decrypt(userData.medicalHistory, 'secret key 123');
         var originalText = bytes.toString(CryptoJS.enc.Utf8);
         medicalHistory = JSON.parse(originalText);
-        console.log(medicalHistory);
       }
     }
   });
@@ -126,7 +123,6 @@ const uploadPrescription = async (req, res) => {
   }
 
   medicalHistory = [...medicalHistory, newPrescription];
-  console.log("reached");
   var ciphertext = CryptoJS.AES.encrypt(JSON.stringify(medicalHistory), 'secret key 123').toString();
 
 
@@ -134,39 +130,27 @@ const uploadPrescription = async (req, res) => {
     { medicalHistory: ciphertext },
     function (err, updateRes) {
     if (err){
-        console.log(err);
         res.json({ success: false, message: "error while updating user" });
-    }
-    else{
-        console.log("Updated user medical history");
     }
   });
 
   await Appointment.findOne({ patientID, date, time_slot: time }, async (err, userData) => {
     if(!userData || err){
-      console.log(err);
       res.json({ success: false, message: "error while finding user in appointments" });
       return;
-    } 
-    else{
-      console.log("appointment found to delete");
     }
   });
 
   await Appointment.deleteOne({ patientID, date, time_slot: time }, function(err, result) {
     if (!result || err) {
-      console.log(err); 
       res.json({ success: false, message: "error while deleting from appointment array" });
       return;
-    } else {
-      console.log("Data deleted from appointments");
     }
   });
 
 
   await Doc.findById(docID, (err, docData) => {
     if(!docData || err){
-      console.log(err);
       res.json({ success: false, message: "error while finding doctor" });
       return;
     }
@@ -174,12 +158,10 @@ const uploadPrescription = async (req, res) => {
 
   await Doc.updateOne({ _id: docID }, { currentAppointment: [] }, (err, docs) => {
     if (err){
-      console.log(err);
       res.json({ success: false, message: "error while updating doctor" });
       return;
     }
     else{
-      console.log("Updated doc, emptied the currentAppointment array");
       res.json({ success: true, docs });
     }
   });
@@ -191,11 +173,9 @@ const upcomingAppointment = async (req, res) => {
   const pid = req.body.id;
   await Appointment.find({ docID: pid }, (err, upAppointments) => {
     if(upAppointments.length === 0 || err){
-      console.log(err);
       res.json({ success: false, message: "error in finding upcoming appointments" });
     }
     else{
-      console.log("upcoming appointments of patient given");
       res.json({ success: true, upAppointments });
     }
   })
@@ -211,21 +191,17 @@ const startAppointment = async (req, res) => {
 
   await Doc.findById(did, (err, doc) => {
     if(!doc || err){
-      console.log(err);
       res.json({ success: false, message: "error in finding doctor" });
       return;
     }
     else{
-      // console.log(doc);
       temp = true;
       currentAppointment = doc.currentAppointment;
     }
   });
-  // console.log(currentAppointment);
 
   if(currentAppointment.length === 0){
     if(temp){
-      console.log("no current appointments");
       res.json({ success: true, currentAppointment });
     }
     return;
@@ -236,11 +212,9 @@ const startAppointment = async (req, res) => {
 
     User.findById(pid, (err, prevAppointments) => {
       if(!prevAppointments || err){
-        console.log(err);
         res.json({ success: false, message: "error in finding medical history" });
       }
       else{
-        console.log("medical history of patient given");
         var bytes  = CryptoJS.AES.decrypt(prevAppointments.medicalHistory, 'secret key 123');
         var originalText = bytes.toString(CryptoJS.enc.Utf8);
         let medicalHistory;
